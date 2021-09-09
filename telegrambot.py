@@ -63,7 +63,7 @@ def melon_chart_crawling():
     melon = driver.page_source
     soup = BeautifulSoup(melon, 'html.parser')
     title = soup.select('#frm > div div.ellipsis.rank01 > span > a')
-    artist = soup.select('#frm > div div.ellipsis.rank02 > span > a')
+    artist = soup.select('#frm > div div.ellipsis.rank02 > span')
 
     titles = []
     for i,j in enumerate(title):
