@@ -2,13 +2,15 @@ import telegram
 import requests
 from telegram.ext import Updater
 from telegram.ext import MessageHandler, Filters
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup 
 from selenium import webdriver
 import urllib.request as req
 import os
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+API_key='knI%2FsEhuhoIf37FOmsc8uCq6qdcCXaJU9%2BKHEwgtLzMWGJ7A7LtC3w3Z3JvKzcE4cSrxn6reCcJi2FzIcKvKAQ%3D%3D'
+
 options = webdriver.ChromeOptions()
 options.add_argument('headless')
 options.add_argument('window-size=1920x1080')
@@ -93,7 +95,6 @@ def movie_chart_crawling():
     req=session.get(addr)
     soup=BeautifulSoup(req.text,'html.parser')
     titles=soup.find_all('dl',class_='lst_dsc')
-
     cnt=1
     output=" "
 
@@ -106,9 +107,39 @@ def movie_chart_crawling():
         cnt+=1
         if cnt==6:
             break
-        
-    #return output   
-#def bus_crawling():
+    #return output 
+  
+def bus_crawling(message):
+    serviceKey=API_key
+
+    #버스 Id와, 버스이름 매칭
+    #노선id==버스id라고 생각하자.
+    route_7_list={
+        '100100316':'6642',
+        '100100307':'6630',
+        '100100309':'6632',
+        '232000067':'388김포',
+        #위 4개: 7단지정류소
+        }
+
+    #route_4_list={'115900005':'강서05'}
+    out_put1=[]
+    if message=="버스":
+        for routeId,bus_num in route_7_list.items():
+            #7단지 정류소 id
+            stationId="115000302"
+            #버스 ID
+            routeId=str(routeId)
+            url="http://ws.bus.go.kr/api/rest/arrive/getArrInfoByRouteAll?serviceKey={}&stId={}&busRouteId={}".format(serviceKey,stationId,routeId)
+            response=requests.get(url).text
+            soup = BeautifulSoup(response, "html.parser")
+            print(soup.arrmsg1)
+            out_put1.append([bus_num,soup.arrmsg1.text,soup.arrmsg2.text])
+        msg=''
+        for val in out_put1:
+            msg+='{}\n 첫번째: {}\n 두번째: {}\n'.format(val[0],val[1],val[2])       
+        return msg
+
 def n_weather_crawling():
     url="https://search.naver.com/search.naver?where=nexearch&sm=top_hty&fbm=0&ie=utf8&query=%EB%B0%9C%EC%82%B01%EB%8F%99%EB%82%A0%EC%94%A8"
     r=requests.get(url)
@@ -136,7 +167,8 @@ info_message = '''- 오늘 확진자 수 확인 : "코로나" 입력
 - 코로나 관련 뉴스 : "뉴스" 입력
 - 실시간 멜론차트10순위: "멜론" 입력
 - 코로나 관련 이미지 : "이미지" 입력
-- 버스 도착 정보: "4단지" or "7단지" 입력
+- 네이버 영화 순위: "영화" 입력
+- 버스 도착 정보:  "버스" 입력
 - 동네 날씨 정보: :동네날씨" 입력 '''
 bot.sendMessage(chat_id=id, text=info_message)
  
@@ -182,10 +214,10 @@ def handler(update, context):
         bot.sendMessage(chat_id=id,text=info_message)
         #마을버스: 단일 '5번버스'만 통행함
         #7단지: 여러 버스가 통행함
-    # elif(user_text=="4단지" or user_text=="7단지"):
-    #     bus_info=bus_crawling(user_text)
-    #     bot.send_message(chat_id=id,text=bus_info)
-    #     bot.sendMessage(chat_id=id,text=info_message)
+    elif(user_text=="버스"):
+        bus_info=bus_crawling(user_text)
+        bot.send_message(chat_id=id,text=bus_info)
+        bot.sendMessage(chat_id=id,text=info_message)
     elif(user_text=="동네날씨"):
         #n: neighbor
         n_weather=n_weather_crawling()
