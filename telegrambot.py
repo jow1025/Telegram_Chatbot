@@ -9,7 +9,7 @@ import os
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-API_key='knI%2FsEhuhoIf37FOmsc8uCq6qdcCXaJU9%2BKHEwgtLzMWGJ7A7LtC3w3Z3JvKzcE4cSrxn6reCcJi2FzIcKvKAQ%3D%3D'
+API_key='공공데이터 버스도착정보 API 키'
 
 options = webdriver.ChromeOptions()
 options.add_argument('headless')
@@ -159,8 +159,8 @@ def n_weather_crawling():
 
 
 #토큰 넘버
-token = "1964648449:AAGwLDIrHikrW68jE5IsajdeFprCBbCqWZI"
-id = "1954654082"
+token = "토큰"
+id = "id값"
  
 bot = telegram.Bot(token)
 info_message = '''- 오늘 확진자 수 확인 : "코로나" 입력
