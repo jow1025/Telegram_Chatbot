@@ -20,16 +20,16 @@
 
 각 세부 기능과 결과는 아래 링크를 통해 확인해주세요.
 
-텔레그램 설치 및 메세지 전송과 응답: https://jow1025.tistory.com/317
+1. 텔레그램 설치 및 메세지 전송과 응답: https://jow1025.tistory.com/317
 
-코로나 관련 정보: https://jow1025.tistory.com/319
+2. 코로나 관련 정보: https://jow1025.tistory.com/319
 
-최신 영화 순위: https://jow1025.tistory.com/320
+3. 최신 영화 순위: https://jow1025.tistory.com/320
 
-실시간 음원 차트: https://jow1025.tistory.com/321
+4. 실시간 음원 차트: https://jow1025.tistory.com/321
 
-실시간 동네 날씨: https://jow1025.tistory.com/322
+5. 실시간 동네 날씨: https://jow1025.tistory.com/322
 
-실시간 버스 도착 정보: https://jow1025.tistory.com/323
+6. 실시간 버스 도착 정보: https://jow1025.tistory.com/323
 
-공공데이터 API 서비스 호출 에러 관련: https://jow1025.tistory.com/318
+7. 공공데이터 API 서비스 호출 에러 관련: https://jow1025.tistory.com/318
