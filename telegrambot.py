@@ -1,5 +1,5 @@
 import telegram
-import requests
+import requests, json, xmltodict
 from telegram.ext import Updater
 from telegram.ext import MessageHandler, Filters
 from bs4 import BeautifulSoup 
@@ -9,20 +9,24 @@ import os
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-API_key='공공데이터 버스도착정보 API 키'
 
 options = webdriver.ChromeOptions()
+#크롬창을 키지 않고 연결
 options.add_argument('headless')
+#사이즈 
 options.add_argument('window-size=1920x1080')
+#GPU설정 X
 options.add_argument("disable-gpu")
 # 혹은 options.add_argument("--disable-gpu")
 driver  = webdriver.Chrome("./chromedriver.exe", options = options) 
 #확진자 검색 후 f12로 코로나 확진자 수 정보 컴포넌트 위치 파악 후 크롤링
 def covid_num_crawling():
     code = req.urlopen("https://search.naver.com/search.naver?where=nexearch&sm=top_hty&fbm=0&ie=utf8&query=%ED%99%95%EC%A7%84%EC%9E%90")
+    #html 방식으로 파싱
     soup = BeautifulSoup(code, "html.parser")
+    #정보 get
     info_num = soup.select("div.status_info em")
-    result = info_num[0].string 
+    result = info_num[0].string #=> 확진자
     return result
  
 def covid_news_crawling():
@@ -109,36 +113,30 @@ def movie_chart_crawling():
             break
     #return output 
   
-def bus_crawling(message):
-    serviceKey=API_key
+def bus_crawling():
+    serviceKey='api키'
+    
+    # 정류소 id
+    #stationId="115000302"
+    stationId="115000116"
+    #버스 ID
+    
+    url="http://ws.bus.go.kr/api/rest/arrive/getLowArrInfoByStId?serviceKey={}&stId={}".format(serviceKey,stationId)
+    #get으로 요청함
+    response=requests.get(url).content
+    #xml파일을 dict로 파싱하여 사용
+    dict=xmltodict.parse(response)
 
-    #버스 Id와, 버스이름 매칭
-    #노선id==버스id라고 생각하자.
-    route_7_list={
-        '100100316':'6642',
-        '100100307':'6630',
-        '100100309':'6632',
-        '232000067':'388김포',
-        #위 4개: 7단지정류소
-        }
+    #원하는 데이터가 ServiceResult 내부 msgBody 내부 itemList내부에 있음 
+    #다시 dict로 받은 값을 Json로 변환 
+    jsonString=json.dumps(dict['ServiceResult']['msgBody']['itemList'],ensure_ascii=False)
+    #json을 형태로 받은 데이터를 Python의 객체로 변환 (dict)
+    jsonObj=json.loads(jsonString)
 
-    #route_4_list={'115900005':'강서05'}
-    out_put1=[]
-    if message=="버스":
-        for routeId,bus_num in route_7_list.items():
-            #7단지 정류소 id
-            stationId="115000302"
-            #버스 ID
-            routeId=str(routeId)
-            url="http://ws.bus.go.kr/api/rest/arrive/getArrInfoByRouteAll?serviceKey={}&stId={}&busRouteId={}".format(serviceKey,stationId,routeId)
-            response=requests.get(url).text
-            soup = BeautifulSoup(response, "html.parser")
-            print(soup.arrmsg1)
-            out_put1.append([bus_num,soup.arrmsg1.text,soup.arrmsg2.text])
-        msg=''
-        for val in out_put1:
-            msg+='{}\n 첫번째: {}\n 두번째: {}\n'.format(val[0],val[1],val[2])       
-        return msg
+    msg=''
+    for i in range(len(jsonObj)):
+        msg+='{}\n 첫번째: {}\n 두번째: {}\n'.format(jsonObj[i]['rtNm'],jsonObj[i]['arrmsg1'],jsonObj[i]['arrmsg2'])
+    return msg
 
 def n_weather_crawling():
     url="https://search.naver.com/search.naver?where=nexearch&sm=top_hty&fbm=0&ie=utf8&query=%EB%B0%9C%EC%82%B01%EB%8F%99%EB%82%A0%EC%94%A8"
@@ -159,8 +157,8 @@ def n_weather_crawling():
 
 
 #토큰 넘버
-token = "토큰"
-id = "id값"
+token = "토큰값"
+id = "id넘버"
  
 bot = telegram.Bot(token)
 info_message = '''- 오늘 확진자 수 확인 : "코로나" 입력
@@ -215,7 +213,7 @@ def handler(update, context):
         #마을버스: 단일 '5번버스'만 통행함
         #7단지: 여러 버스가 통행함
     elif(user_text=="버스"):
-        bus_info=bus_crawling(user_text)
+        bus_info=bus_crawling()
         bot.send_message(chat_id=id,text=bus_info)
         bot.sendMessage(chat_id=id,text=info_message)
     elif(user_text=="동네날씨"):
